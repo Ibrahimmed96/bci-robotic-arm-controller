@@ -22,3 +22,5 @@ pip install -r requirements.txt
 python openbci_reader/stream_data.py
 python signal_processing/eeg_classifier.py
 ros2 run ros2_publisher arm_control_node
+
+# Updated on 2022-07-05
