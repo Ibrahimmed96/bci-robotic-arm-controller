@@ -1,0 +1,228 @@
+# Brain Command Mapping Configuration
+# Authors: Ibrahim Mediouni, Selim Ouirari
+# Date: July 2022
+
+# Mapping from classified brain states to robotic arm commands
+brain_to_arm_mapping:
+  
+  # Basic States
+  rest:
+    arm_command: "STOP"
+    description: "Stop all arm movement"
+    parameters:
+      immediate: true
+    priority: 1                # Highest priority
+    
+  # Movement Commands
+  focus:
+    arm_command: "MOVE_FORWARD"
+    description: "Move arm forward (away from base)"
+    parameters:
+      step_size: 0.02         # 2cm steps
+      max_velocity: 0.1       # m/s
+    priority: 3
+    
+  relax:
+    arm_command: "MOVE_BACKWARD"
+    description: "Move arm backward (toward base)"
+    parameters:
+      step_size: 0.02
+      max_velocity: 0.1
+    priority: 3
+    
+  movement:
+    arm_command: "MOVE_UP"
+    description: "Move arm upward"
+    parameters:
+      step_size: 0.02
+      max_velocity: 0.1
+    priority: 3
+    
+  # Directional Commands (Motor Imagery)
+  left_hand:
+    arm_command: "MOVE_LEFT"
+    description: "Move arm to the left"
+    parameters:
+      step_size: 0.02
+      max_velocity: 0.1
+    priority: 3
+    
+  right_hand:
+    arm_command: "MOVE_RIGHT"
+    description: "Move arm to the right"
+    parameters:
+      step_size: 0.02
+      max_velocity: 0.1
+    priority: 3
+    
+  # Additional Commands
+  up:
+    arm_command: "MOVE_UP"
+    description: "Move arm upward"
+    parameters:
+      step_size: 0.02
+      max_velocity: 0.1
+    priority: 3
+    
+  down:
+    arm_command: "MOVE_DOWN"
+    description: "Move arm downward"
+    parameters:
+      step_size: 0.02
+      max_velocity: 0.1
+    priority: 3
+    
+  # Gripper Commands
+  open:
+    arm_command: "OPEN_GRIPPER"
+    description: "Open the gripper"
+    parameters:
+      opening: 1.0           # Fully open (0-1)
+      speed: 0.5            # Opening speed
+    priority: 2
+    
+  close:
+    arm_command: "CLOSE_GRIPPER"
+    description: "Close the gripper"
+    parameters:
+      opening: 0.0          # Fully closed (0-1)
+      speed: 0.5            # Closing speed
+    priority: 2
+    
+  # System Commands
+  home:
+    arm_command: "HOME_POSITION"
+    description: "Move arm to home position"
+    parameters:
+      speed: 0.2            # Slower for safety
+    priority: 2
+
+# Command Execution Rules
+execution_rules:
+  
+  # Confidence requirements
+  confidence_thresholds:
+    STOP: 0.5               # Lower threshold for safety
+    MOVE_FORWARD: 0.7       # Standard threshold
+    MOVE_BACKWARD: 0.7
+    MOVE_UP: 0.7
+    MOVE_DOWN: 0.7
+    MOVE_LEFT: 0.7
+    MOVE_RIGHT: 0.7
+    OPEN_GRIPPER: 0.6       # Slightly lower for gripper
+    CLOSE_GRIPPER: 0.6
+    HOME_POSITION: 0.8      # Higher for system commands
+  
+  # Temporal constraints
+  temporal_rules:
+    min_command_interval: 0.5     # Minimum time between commands (seconds)
+    max_continuous_duration: 5.0  # Max continuous movement time (seconds)
+    debounce_time: 0.2           # Debounce rapid state changes (seconds)
+    
+  # Safety overrides
+  safety_overrides:
+    emergency_stop_overrides_all: true
+    workspace_limits_enforced: true
+    collision_detection_enabled: true
+    max_velocity_enforced: true
+    joint_limits_enforced: true
+
+# Advanced Command Combinations
+command_sequences:
+  
+  # Predefined movement sequences
+  pick_and_place:
+    description: "Pick up object and place it elsewhere"
+    sequence:
+      - {brain_state: "focus", duration: 1.0}      # Approach object
+      - {brain_state: "down", duration: 0.5}       # Lower to object
+      - {brain_state: "close", duration: 0.5}      # Grasp object
+      - {brain_state: "up", duration: 0.5}         # Lift object
+      - {brain_state: "right_hand", duration: 1.0} # Move to target
+      - {brain_state: "down", duration: 0.5}       # Lower to target
+      - {brain_state: "open", duration: 0.5}       # Release object
+      - {brain_state: "up", duration: 0.5}         # Lift away
+      - {brain_state: "home", duration: 2.0}       # Return home
+    
+  # Calibration sequence
+  calibration:
+    description: "Move through calibration positions"
+    sequence:
+      - {brain_state: "home", duration: 2.0}
+      - {brain_state: "focus", duration: 1.0}
+      - {brain_state: "left_hand", duration: 1.0}
+      - {brain_state: "right_hand", duration: 1.0}
+      - {brain_state: "up", duration: 1.0}
+      - {brain_state: "down", duration: 1.0}
+      - {brain_state: "home", duration: 2.0}
+
+# User Adaptation Settings
+user_adaptation:
+  
+  # Personalization parameters
+  learning_enabled: true
+  adaptation_rate: 0.1          # How quickly to adapt to user patterns
+  confidence_adjustment: true   # Adjust thresholds based on user performance
+  
+  # User-specific thresholds
+  user_profiles:
+    default:
+      confidence_multiplier: 1.0
+      reaction_time: 0.5        # Expected user reaction time
+      fatigue_detection: true   # Monitor for user fatigue
+      
+    expert:
+      confidence_multiplier: 0.9  # Lower thresholds for experienced users
+      reaction_time: 0.3
+      fatigue_detection: false
+      
+    beginner:
+      confidence_multiplier: 1.2  # Higher thresholds for safety
+      reaction_time: 1.0
+      fatigue_detection: true
+
+# Feedback and Monitoring
+feedback:
+  
+  # Visual feedback
+  visual_indicators:
+    brain_state_display: true   # Show current classified state
+    confidence_meter: true      # Show classification confidence
+    arm_position_display: true  # Show current arm position
+    command_history: true       # Show recent commands
+    
+  # Audio feedback
+  audio_feedback:
+    enabled: true
+    command_confirmation: true  # Beep on command execution
+    error_alerts: true         # Alert on errors
+    volume: 0.5               # Audio volume (0-1)
+    
+  # Haptic feedback (if available)
+  haptic_feedback:
+    enabled: false            # Haptic device available
+    intensity: 0.7           # Feedback intensity (0-1)
+    pattern: "pulse"         # Feedback pattern
+
+# Data Logging
+logging:
+  
+  # What to log
+  log_brain_states: true        # Log classified brain states
+  log_arm_commands: true        # Log executed arm commands
+  log_confidence_scores: true   # Log classification confidence
+  log_execution_times: true     # Log command execution timing
+  log_errors: true             # Log system errors
+  
+  # Log file settings
+  log_directory: "logs/"
+  log_file_prefix: "bci_commands_"
+  log_rotation: "daily"        # daily, weekly, monthly
+  max_log_files: 30           # Keep last 30 log files
+  
+  # Performance metrics
+  performance_logging:
+    enabled: true
+    metrics_interval: 60      # Log performance every 60 seconds
+    include_system_stats: true # CPU, memory usage
+    include_timing_stats: true # Processing times

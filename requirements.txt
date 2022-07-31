@@ -1,0 +1,36 @@
+# BCI Robotic Arm Controller - Dependencies
+# Authors: Ibrahim Mediouni, Selim Ouirari
+# Date: July 2022
+
+# Core dependencies
+numpy>=1.21.0
+scipy>=1.7.0
+scikit-learn>=1.0.0
+matplotlib>=3.4.0
+
+# EEG and signal processing
+pyOpenBCI>=0.13
+mne>=0.24.0
+pywavelets>=1.1.1
+
+# ROS2 integration
+# Note: Install ROS2 separately on target system
+# rclpy - included with ROS2 installation
+
+# Hardware communication
+pyserial>=3.5
+pyusb>=1.2.1
+
+# Configuration and utilities
+pyyaml>=6.0
+configparser>=5.2.0
+python-dotenv>=0.19.0
+
+# Optional: For development and debugging
+jupyter>=1.0.0
+ipython>=7.0.0
+tqdm>=4.62.0
+
+# Data storage and analysis
+pandas>=1.3.0
+h5py>=3.3.0

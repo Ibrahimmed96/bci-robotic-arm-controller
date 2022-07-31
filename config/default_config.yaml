@@ -1,0 +1,39 @@
+# BCI Robotic Arm Controller Configuration
+# Authors: Ibrahim Mediouni, Selim Ouirari
+# Date: July 2022
+
+# EEG Acquisition Settings
+eeg_sampling_rate: 250.0      # Sampling frequency in Hz
+eeg_channels: 8               # Number of EEG channels
+eeg_port: "/dev/ttyUSB0"     # OpenBCI serial port
+eeg_baud_rate: 115200        # Serial communication baud rate
+eeg_daisy_mode: false        # Enable 16-channel daisy chain mode
+
+# Signal Processing Settings
+filter_lowcut: 1.0           # High-pass filter cutoff (Hz)
+filter_highcut: 45.0         # Low-pass filter cutoff (Hz)
+notch_frequency: 50.0        # Power line frequency (50/60 Hz)
+notch_quality: 30.0          # Notch filter quality factor
+
+# Classification Settings
+model_type: "rf"             # Machine learning model: 'rf' (Random Forest) or 'svm' (SVM)
+feature_scaling: true        # Enable feature normalization
+confidence_threshold: 0.7    # Minimum confidence for command execution (0-1)
+classification_window: 2.0   # EEG analysis window duration (seconds)
+
+# Robotic Arm Settings
+arm_port: "/dev/ttyACM0"     # STM32 controller serial port
+arm_baud_rate: 115200        # Serial communication baud rate
+arm_joints: 6                # Number of robotic arm joints
+arm_step_size: 0.02          # Movement step size (meters)
+
+# Safety Settings
+max_joint_velocity: 1.0      # Maximum joint velocity (rad/s)
+workspace_x_limits: [0.1, 0.6]  # X-axis workspace limits (min, max) in meters
+workspace_y_limits: [-0.4, 0.4] # Y-axis workspace limits (min, max) in meters  
+workspace_z_limits: [0.0, 0.5]  # Z-axis workspace limits (min, max) in meters
+emergency_stop_enabled: false   # Emergency stop initial state
+
+# System Settings
+log_level: "INFO"            # Logging level: DEBUG, INFO, WARNING, ERROR
+log_file: "logs/bci_system.log"  # Log file path (null for console only)

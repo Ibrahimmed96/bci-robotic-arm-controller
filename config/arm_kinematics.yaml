@@ -1,0 +1,44 @@
+# Robotic Arm Kinematics Configuration
+# Authors: Ibrahim Mediouni, Selim Ouirari
+# Date: July 2022
+
+# Denavit-Hartenberg Parameters
+# Format: [a, alpha, d, theta_offset] for each joint
+# a: link length (meters)
+# alpha: link twist (radians)
+# d: link offset (meters)
+# theta_offset: joint angle offset (radians)
+
+dh_parameters:
+  joint_1: [0.0, 1.5708, 0.15, 0.0]      # Base rotation joint
+  joint_2: [0.25, 0.0, 0.0, -1.5708]     # Shoulder joint
+  joint_3: [0.20, 0.0, 0.0, 0.0]         # Elbow joint
+  joint_4: [0.0, 1.5708, 0.15, 0.0]      # Wrist roll joint
+  joint_5: [0.0, -1.5708, 0.0, 0.0]      # Wrist pitch joint
+  joint_6: [0.0, 0.0, 0.08, 0.0]         # Wrist yaw joint
+
+# Joint Limits (radians)
+joint_limits:
+  joint_1: [-3.14159, 3.14159]    # ±180 degrees
+  joint_2: [-1.5708, 1.5708]      # ±90 degrees
+  joint_3: [-3.14159, 3.14159]    # ±180 degrees
+  joint_4: [-3.14159, 3.14159]    # ±180 degrees
+  joint_5: [-3.14159, 3.14159]    # ±180 degrees
+  joint_6: [-3.14159, 3.14159]    # ±180 degrees
+
+# Maximum Joint Velocities (rad/s)
+max_joint_velocities: [1.0, 1.0, 1.5, 2.0, 2.0, 3.0]
+
+# Home Position (radians)
+home_position: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+# End-Effector Configuration
+end_effector:
+  gripper_type: "parallel"      # Type of gripper
+  max_opening: 0.08            # Maximum gripper opening (meters)
+  grip_force_limit: 50.0       # Maximum grip force (Newtons)
+
+# Tool Center Point (TCP) offset from last joint
+tcp_offset:
+  position: [0.0, 0.0, 0.08]    # TCP position offset [x, y, z] (meters)
+  orientation: [0.0, 0.0, 0.0]  # TCP orientation offset [rx, ry, rz] (radians)

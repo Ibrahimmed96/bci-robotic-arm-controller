@@ -1,0 +1,162 @@
+# EEG Signal Processing Configuration
+# Authors: Ibrahim Mediouni, Selim Ouirari
+# Date: July 2022
+
+# Frequency Band Definitions
+frequency_bands:
+  delta:
+    range: [0.5, 4.0]          # Deep sleep, unconscious processes
+    description: "Delta waves - deep sleep and unconscious activity"
+  
+  theta:
+    range: [4.0, 8.0]          # Drowsiness, meditation, creativity
+    description: "Theta waves - drowsiness, meditation, creative states"
+  
+  alpha:
+    range: [8.0, 13.0]         # Relaxed awareness, eyes closed
+    description: "Alpha waves - relaxed awareness, calm alertness"
+  
+  beta:
+    range: [13.0, 30.0]        # Active thinking, concentration
+    description: "Beta waves - active thinking, concentration, problem solving"
+  
+  gamma:
+    range: [30.0, 100.0]       # High-level cognitive processing
+    description: "Gamma waves - high-level cognitive processing, consciousness"
+
+# Digital Filter Configurations
+filters:
+  bandpass:
+    type: "butterworth"        # Filter type
+    order: 4                   # Filter order
+    low_cutoff: 1.0           # Low cutoff frequency (Hz)
+    high_cutoff: 45.0         # High cutoff frequency (Hz)
+    description: "General EEG signal conditioning"
+  
+  notch:
+    type: "iir_notch"         # IIR notch filter
+    frequency: 50.0           # Notch frequency (Hz) - change to 60.0 for US
+    quality_factor: 30.0      # Q factor (higher = narrower notch)
+    description: "Power line interference removal"
+  
+  highpass:
+    type: "butterworth"       # Filter type
+    order: 2                  # Filter order
+    cutoff: 0.5              # Cutoff frequency (Hz)
+    description: "Baseline drift removal"
+  
+  lowpass:
+    type: "butterworth"       # Filter type
+    order: 4                  # Filter order
+    cutoff: 45.0             # Cutoff frequency (Hz)
+    description: "Anti-aliasing filter"
+
+# Artifact Detection Parameters
+artifact_detection:
+  amplitude_threshold: 150.0   # Maximum acceptable amplitude (µV)
+  gradient_threshold: 50.0     # Maximum rate of change (µV/sample)
+  kurtosis_threshold: 5.0      # Statistical spikiness threshold
+  window_size: 0.5            # Analysis window size (seconds)
+  
+  # Artifact types to detect
+  detection_methods:
+    - "amplitude_clipping"     # Electrode saturation
+    - "rapid_changes"          # Eye blinks, muscle artifacts
+    - "statistical_outliers"   # Abnormal signal distributions
+    - "flat_line"             # Disconnected electrodes
+
+# Feature Extraction Parameters
+feature_extraction:
+  # Spectral features
+  spectral:
+    window_length: 2.0         # Analysis window (seconds)
+    overlap: 0.5              # Window overlap (fraction)
+    window_type: "hann"       # Window function
+    
+    features:
+      - "band_power"          # Power in each frequency band
+      - "relative_power"      # Normalized band power
+      - "peak_frequency"      # Dominant frequency in each band
+      - "spectral_centroid"   # Weighted mean frequency
+      - "spectral_entropy"    # Frequency distribution measure
+      - "alpha_beta_ratio"    # Common BCI feature
+  
+  # Temporal features
+  temporal:
+    features:
+      - "mean"                # Signal mean
+      - "std"                 # Standard deviation
+      - "variance"           # Signal variance
+      - "skewness"           # Distribution asymmetry
+      - "kurtosis"           # Distribution peakedness
+      - "rms"                # Root mean square
+      - "zero_crossing_rate" # Oscillation measure
+      - "hjorth_parameters"  # Activity, mobility, complexity
+      - "peak_count"         # Number of local maxima
+
+# Classification Parameters
+classification:
+  # Data preparation
+  window_size: 2.0            # Classification window (seconds)
+  step_size: 0.2             # Window advancement (seconds)
+  min_clean_percentage: 70.0  # Minimum artifact-free data required
+  
+  # Model configuration
+  models:
+    random_forest:
+      n_estimators: 100       # Number of trees
+      max_depth: 10          # Maximum tree depth
+      min_samples_split: 5   # Minimum samples to split
+      min_samples_leaf: 2    # Minimum samples per leaf
+      random_state: 42       # Reproducibility seed
+    
+    svm:
+      kernel: "rbf"          # Kernel type
+      C: 1.0                # Regularization parameter
+      gamma: "scale"        # Kernel coefficient
+      probability: true     # Enable probability estimates
+      random_state: 42      # Reproducibility seed
+  
+  # Cross-validation
+  validation:
+    method: "stratified_kfold" # Validation method
+    n_splits: 5               # Number of folds
+    test_size: 0.2           # Validation set size
+
+# Brain State Definitions
+brain_states:
+  rest:
+    description: "Resting state - no specific mental task"
+    training_protocol: "Eyes closed, relaxed, no specific thoughts"
+    
+  focus:
+    description: "Focused attention state"
+    training_protocol: "Concentrate on a specific object or task"
+    
+  relax:
+    description: "Deep relaxation state"
+    training_protocol: "Meditative state, clear mind"
+    
+  movement:
+    description: "Motor imagery - imagined movement"
+    training_protocol: "Imagine moving hand or arm without actual movement"
+    
+  left_hand:
+    description: "Left hand motor imagery"
+    training_protocol: "Imagine clenching left fist"
+    
+  right_hand:
+    description: "Right hand motor imagery"
+    training_protocol: "Imagine clenching right fist"
+
+# Real-time Processing Parameters
+realtime:
+  buffer_size: 2048          # Sample buffer size
+  processing_interval: 0.2   # Processing frequency (seconds)
+  prediction_smoothing: 0.8  # Exponential smoothing factor
+  confidence_threshold: 0.7  # Minimum confidence for action
+  
+  # Performance optimization
+  parallel_processing: true  # Enable multi-threading
+  max_threads: 4            # Maximum processing threads
+  memory_limit: 1024        # Memory limit (MB)
