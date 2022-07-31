@@ -37,3 +37,4 @@ emergency_stop_enabled: false   # Emergency stop initial state
 # System Settings
 log_level: "INFO"            # Logging level: DEBUG, INFO, WARNING, ERROR
 log_file: "logs/bci_system.log"  # Log file path (null for console only)
+# Updated on 2022-07-31
