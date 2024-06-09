@@ -24,3 +24,4 @@ python signal_processing/eeg_classifier.py
 ros2 run ros2_publisher arm_control_node
 
 # Updated on 2022-07-05
+# Updated on 2024-06-09
