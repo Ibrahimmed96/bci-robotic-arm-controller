@@ -701,7 +701,7 @@ For questions, issues, or contributions:
 
 - **Issues**: [GitHub Issues](https://github.com/ibrahimmediouni/bci-robotic-arm-controller/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/ibrahimmediouni/bci-robotic-arm-controller/discussions)
-- **Email**: ibrahim.mediouni@example.com
+- **Email**: ibrahimmediouni@gmail.com
 
 ## ⚡ Performance Optimization
 
