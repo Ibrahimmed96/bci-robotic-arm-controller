@@ -661,6 +661,7 @@ def create_default_config_file(path: str = "config.yaml") -> None:
         '# BCI Robotic Arm Controller Configuration': None,
         '# Authors: Ibrahim Mediouni, Selim Ouirari': None,
         '# Date: July 2022': None,
+        '# Version: 2.0.0': None,
         '': None,
         
         '# EEG Acquisition Settings': None,
