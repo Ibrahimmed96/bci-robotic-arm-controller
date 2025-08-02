@@ -34,3 +34,6 @@ tqdm>=4.62.0
 # Data storage and analysis
 pandas>=1.3.0
 h5py>=3.3.0
+
+# Performance monitoring
+psutil>=5.8.0
