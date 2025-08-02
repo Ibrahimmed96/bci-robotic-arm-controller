@@ -21,7 +21,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="bci-robotic-arm-controller",
-    version="1.0.0",
+    version="2.0.0",
     authors=["Ibrahim Mediouni", "Selim Ouirari"],
     author_email="ibrahim.mediouni@example.com",
     description="Control robotic arms using EEG brain signals via OpenBCI and ROS2",
