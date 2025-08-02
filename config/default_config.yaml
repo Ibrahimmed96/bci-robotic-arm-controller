@@ -1,6 +1,7 @@
 # BCI Robotic Arm Controller Configuration
 # Authors: Ibrahim Mediouni, Selim Ouirari
 # Date: July 2022
+# Version: 2.0.0
 
 # EEG Acquisition Settings
 eeg_sampling_rate: 250.0      # Sampling frequency in Hz
