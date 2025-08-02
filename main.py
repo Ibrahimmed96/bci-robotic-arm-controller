@@ -12,6 +12,7 @@ training data collection, model training, and system testing.
 
 Authors: Ibrahim Mediouni, Selim Ouirari
 Date: July 2022
+Version: 2.0.0
 """
 
 import sys
