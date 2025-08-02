@@ -607,14 +607,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-# Updated on 2022-08-19
-# Updated on 2022-08-06
-# Updated on 2022-08-25
-# Updated on 2022-08-28
-# Updated on 2022-08-05
-# Updated on 2022-08-05
-# Updated on 2022-08-07
-# Updated on 2022-08-31
-# Updated on 2022-08-22
-# Updated on 2023-04-08
-# Updated on 2024-06-20

@@ -586,32 +586,3 @@ Examples:
 
 if __name__ == "__main__":
     main()
-# Updated on 2022-07-09
-# Updated on 2022-08-07
-# Updated on 2022-09-03
-# Updated on 2022-10-25
-# Updated on 2022-11-02
-# Updated on 2022-11-14
-# Updated on 2022-12-12
-# Updated on 2023-01-05
-# Updated on 2023-01-07
-# Updated on 2023-03-02
-# Updated on 2023-03-06
-# Updated on 2023-03-10
-# Updated on 2023-03-08
-# Updated on 2023-03-23
-# Updated on 2023-04-11
-# Updated on 2023-05-11
-# Updated on 2023-05-31
-# Updated on 2023-06-21
-# Updated on 2023-06-26
-# Updated on 2024-01-17
-# Updated on 2024-01-30
-# Updated on 2024-06-15
-# Updated on 2024-06-21
-# Updated on 2024-06-21
-# Updated on 2024-12-10
-# Updated on 2024-12-21
-# Updated on 2024-12-21
-# Updated on 2025-01-19
-# Updated on 2025-01-29

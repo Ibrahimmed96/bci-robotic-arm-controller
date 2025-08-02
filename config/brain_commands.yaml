@@ -226,4 +226,3 @@ logging:
     metrics_interval: 60      # Log performance every 60 seconds
     include_system_stats: true # CPU, memory usage
     include_timing_stats: true # Processing times
-# Updated on 2023-03-27

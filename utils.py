@@ -765,23 +765,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-# Updated on 2022-07-13
-# Updated on 2022-08-18
-# Updated on 2022-09-26
-# Updated on 2022-10-30
-# Updated on 2022-11-16
-# Updated on 2023-02-20
-# Updated on 2023-03-06
-# Updated on 2023-03-07
-# Updated on 2023-04-12
-# Updated on 2023-05-18
-# Updated on 2023-05-25
-# Updated on 2023-06-13
-# Updated on 2023-06-14
-# Updated on 2023-06-12
-# Updated on 2023-06-30
-# Updated on 2024-01-30
-# Updated on 2024-06-15
-# Updated on 2024-12-11
-# Updated on 2024-12-20
-# Updated on 2025-01-24
