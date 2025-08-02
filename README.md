@@ -1,4 +1,5 @@
 # 🧠 BCI Robotic Arm Controller
+*Enhanced for advanced neural control and real-time robotic interaction*
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://python.org)
 [![ROS2](https://img.shields.io/badge/ROS2-Galactic%7CHumble-green.svg)](https://docs.ros.org)
