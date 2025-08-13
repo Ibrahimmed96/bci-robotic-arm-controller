@@ -353,6 +353,21 @@ class DataValidator:
         -------
         validation_result : dict
             Dictionary containing validation results and quality metrics
+            
+        Examples
+        --------
+        # Validate real-time EEG data from OpenBCI
+        >>> eeg_data, _ = streamer.get_recent_data(duration_seconds=2.0)
+        >>> result = DataValidator.validate_eeg_data(eeg_data, 250.0)
+        >>> if result['valid']:
+        ...     print(f"Data quality: {result['metrics']['overall_quality']:.2f}")
+        ... else:
+        ...     print(f"Data issues: {result['warnings']}")
+        
+        # Check signal quality for each channel
+        >>> for i, quality in enumerate(result['channel_quality']):
+        ...     if quality < 0.5:
+        ...         print(f"Poor signal quality on channel {i}: {quality:.2f}")
         """
         if data.size == 0:
             return {'valid': False, 'error': 'Empty data array'}
@@ -465,6 +480,23 @@ class DataValidator:
         -------
         validation_result : dict
             Dictionary containing validation results
+            
+        Examples
+        --------
+        # Validate current arm position before movement
+        >>> current_angles = robot_controller.get_state().joint_angles
+        >>> result = DataValidator.validate_joint_angles(current_angles)
+        >>> if not result['valid']:
+        ...     print(f"Joint limit violation: {result['warnings']}")
+        ...     robot_controller.emergency_stop()
+        
+        # Check specific joint limits for 6-DOF arm
+        >>> min_limits = np.array([-np.pi, -np.pi/2, -np.pi, -np.pi, -np.pi, -np.pi])
+        >>> max_limits = np.array([np.pi, np.pi/2, np.pi, np.pi, np.pi, np.pi])
+        >>> target_angles = np.array([0.1, -0.5, 0.8, -0.2, 0.3, -0.1])
+        >>> result = DataValidator.validate_joint_angles(target_angles, (min_limits, max_limits))
+        >>> if result['valid']:
+        ...     print("Safe to execute movement")
         """
         result = {
             'valid': True,
@@ -528,6 +560,24 @@ class DataValidator:
         -------
         validation_result : dict
             Dictionary containing validation results
+            
+        Examples
+        --------
+        # Validate target position before executing brain command
+        >>> workspace_limits = {'x': (0.1, 0.6), 'y': (-0.4, 0.4), 'z': (0.0, 0.5)}
+        >>> target_pos = np.array([0.3, 0.1, 0.2])  # Safe position
+        >>> result = DataValidator.validate_workspace_position(target_pos, workspace_limits)
+        >>> if result['valid']:
+        ...     print(f"Position within workspace: {target_pos}")
+        ... else:
+        ...     print(f"Position unsafe: {result['warnings']}")
+        
+        # Check if movement would exceed boundaries
+        >>> current_pos = robot_controller.get_state().end_effector_position
+        >>> new_pos = current_pos + np.array([0.05, 0, 0])  # Move 5cm forward
+        >>> result = DataValidator.validate_workspace_position(new_pos, workspace_limits)
+        >>> if not result['valid']:
+        ...     print("Movement would exceed workspace limits")
         """
         result = {
             'valid': True,

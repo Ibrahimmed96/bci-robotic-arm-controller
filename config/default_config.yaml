@@ -2,39 +2,43 @@
 # Authors: Ibrahim Mediouni, Selim Ouirari
 # Date: July 2022
 # Version: 2.0.0
+#
+# This configuration file controls all aspects of the BCI system behavior.
+# Modify values carefully and test in simulation mode before live operation.
+# Use 'python utils.py --validate-config config.yaml' to verify settings.
 
-# EEG Acquisition Settings
-eeg_sampling_rate: 250.0      # Sampling frequency in Hz
-eeg_channels: 8               # Number of EEG channels
-eeg_port: "/dev/ttyUSB0"     # OpenBCI serial port
-eeg_baud_rate: 115200        # Serial communication baud rate
-eeg_daisy_mode: false        # Enable 16-channel daisy chain mode
+# EEG Acquisition Settings - Configure brain signal recording hardware
+eeg_sampling_rate: 250.0      # Sampling frequency in Hz (standard: 250-1000Hz, recommended: 250Hz)
+eeg_channels: 8               # Number of EEG channels (8 for Cyton, 16 for Cyton+Daisy)
+eeg_port: "/dev/ttyUSB0"     # OpenBCI serial port (Linux: /dev/ttyUSB*, Windows: COM*, macOS: /dev/cu.*)
+eeg_baud_rate: 115200        # Serial communication baud rate (fixed for OpenBCI hardware)
+eeg_daisy_mode: false        # Enable 16-channel daisy chain mode (requires Daisy expansion board)
 
-# Signal Processing Settings
-filter_lowcut: 1.0           # High-pass filter cutoff (Hz)
-filter_highcut: 45.0         # Low-pass filter cutoff (Hz)
-notch_frequency: 50.0        # Power line frequency (50/60 Hz)
-notch_quality: 30.0          # Notch filter quality factor
+# Signal Processing Settings - Digital filter parameters for noise reduction
+filter_lowcut: 1.0           # High-pass filter cutoff (Hz) - removes DC drift and very slow artifacts
+filter_highcut: 45.0         # Low-pass filter cutoff (Hz) - removes high-frequency noise and EMG
+notch_frequency: 50.0        # Power line frequency (50Hz Europe/Asia, 60Hz Americas) - removes electrical interference
+notch_quality: 30.0          # Notch filter quality factor (higher = narrower filter, typical: 20-50)
 
-# Classification Settings
-model_type: "rf"             # Machine learning model: 'rf' (Random Forest) or 'svm' (SVM)
-feature_scaling: true        # Enable feature normalization
-confidence_threshold: 0.7    # Minimum confidence for command execution (0-1)
-classification_window: 2.0   # EEG analysis window duration (seconds)
+# Classification Settings - Machine learning parameters for brain state recognition
+model_type: "rf"             # Machine learning model: 'rf' (Random Forest - recommended) or 'svm' (Support Vector Machine)
+feature_scaling: true        # Enable feature normalization (recommended for SVM, optional for RF)
+confidence_threshold: 0.7    # Minimum confidence for command execution (0-1, lower = more responsive, higher = more accurate)
+classification_window: 2.0   # EEG analysis window duration (seconds, 1.5-3.0 typical, longer = more stable)
 
-# Robotic Arm Settings
-arm_port: "/dev/ttyACM0"     # STM32 controller serial port
-arm_baud_rate: 115200        # Serial communication baud rate
-arm_joints: 6                # Number of robotic arm joints
-arm_step_size: 0.02          # Movement step size (meters)
+# Robotic Arm Settings - Hardware interface configuration
+arm_port: "/dev/ttyACM0"     # STM32 controller serial port (Linux: /dev/ttyACM*, Windows: COM*, macOS: /dev/cu.*)
+arm_baud_rate: 115200        # Serial communication baud rate (match controller firmware setting)
+arm_joints: 6                # Number of robotic arm joints (typically 4-7 DOF, adjust for your hardware)
+arm_step_size: 0.02          # Movement step size (meters, 0.01-0.05 typical, smaller = more precise)
 
-# Safety Settings
-max_joint_velocity: 1.0      # Maximum joint velocity (rad/s)
-workspace_x_limits: [0.1, 0.6]  # X-axis workspace limits (min, max) in meters
-workspace_y_limits: [-0.4, 0.4] # Y-axis workspace limits (min, max) in meters  
-workspace_z_limits: [0.0, 0.5]  # Z-axis workspace limits (min, max) in meters
-emergency_stop_enabled: false   # Emergency stop initial state
+# Safety Settings - Critical parameters to prevent dangerous movements
+max_joint_velocity: 1.0      # Maximum joint velocity (rad/s, 0.5-2.0 typical, lower = safer)
+workspace_x_limits: [0.1, 0.6]  # X-axis workspace limits (min, max) in meters - forward/backward reach
+workspace_y_limits: [-0.4, 0.4] # Y-axis workspace limits (min, max) in meters - left/right reach
+workspace_z_limits: [0.0, 0.5]  # Z-axis workspace limits (min, max) in meters - up/down reach
+emergency_stop_enabled: false   # Emergency stop initial state (enable for extra safety during testing)
 
-# System Settings
-log_level: "INFO"            # Logging level: DEBUG, INFO, WARNING, ERROR
-log_file: "logs/bci_system.log"  # Log file path (null for console only)
+# System Settings - Logging and debugging configuration
+log_level: "INFO"            # Logging level: DEBUG (verbose), INFO (standard), WARNING (errors only), ERROR (critical only)
+log_file: "logs/bci_system.log"  # Log file path (null for console only, logs/ directory auto-created)

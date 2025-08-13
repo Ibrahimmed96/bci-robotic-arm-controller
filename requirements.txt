@@ -2,38 +2,38 @@
 # Authors: Ibrahim Mediouni, Selim Ouirari
 # Date: July 2022
 
-# Core dependencies
-numpy>=1.21.0
-scipy>=1.7.0
-scikit-learn>=1.0.0
-matplotlib>=3.4.0
+# Core dependencies - Essential scientific computing libraries
+numpy>=1.21.0              # Multi-dimensional arrays and mathematical functions for signal processing
+scipy>=1.7.0               # Scientific computing library for advanced signal processing algorithms
+scikit-learn>=1.0.0        # Machine learning library for brain state classification models
+matplotlib>=3.4.0          # Plotting library for signal visualization and debugging
 
-# EEG and signal processing
-pyOpenBCI>=0.13
-mne>=0.24.0
-pywavelets>=1.1.1
+# EEG and signal processing - Specialized libraries for neural signal analysis
+pyOpenBCI>=0.13             # Official OpenBCI Python library for hardware communication
+mne>=0.24.0                 # Advanced EEG/MEG analysis toolkit with preprocessing capabilities
+pywavelets>=1.1.1           # Wavelet transforms for time-frequency analysis of neural signals
 
-# ROS2 integration
-# Note: Install ROS2 separately on target system
-# rclpy - included with ROS2 installation
+# ROS2 integration - Robotics middleware for distributed system communication
+# Note: Install ROS2 separately on target system - required for full functionality
+# rclpy - included with ROS2 installation, provides Python ROS2 client library
 
-# Hardware communication
-pyserial>=3.5
-pyusb>=1.2.1
+# Hardware communication - Serial and USB interfaces for device control
+pyserial>=3.5               # Serial communication for OpenBCI and STM32 robotic arm controllers
+pyusb>=1.2.1                # USB device access for advanced hardware integration
 
-# Configuration and utilities
-pyyaml>=6.0
-configparser>=5.2.0
-python-dotenv>=0.19.0
+# Configuration and utilities - System configuration and environment management
+pyyaml>=6.0                 # YAML parser for configuration files and parameter storage
+configparser>=5.2.0         # INI-style configuration file parsing and validation
+python-dotenv>=0.19.0       # Environment variable management for deployment flexibility
 
-# Optional: For development and debugging
-jupyter>=1.0.0
-ipython>=7.0.0
-tqdm>=4.62.0
+# Optional: For development and debugging - Tools for interactive development
+jupyter>=1.0.0              # Interactive notebooks for signal analysis and algorithm development
+ipython>=7.0.0              # Enhanced Python interpreter with debugging capabilities
+tqdm>=4.62.0                # Progress bars for long-running training and data collection tasks
 
-# Data storage and analysis
-pandas>=1.3.0
-h5py>=3.3.0
+# Data storage and analysis - Efficient data handling and persistence
+pandas>=1.3.0               # Data manipulation and analysis for training datasets
+h5py>=3.3.0                 # Hierarchical data format for large-scale neural signal storage
 
-# Performance monitoring
-psutil>=5.8.0
+# Performance monitoring - System resource tracking and optimization
+psutil>=5.8.0               # Process and system utilization monitoring for real-time performance

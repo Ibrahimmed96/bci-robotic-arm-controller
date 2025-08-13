@@ -151,20 +151,30 @@ class RobotController:
             timestamp=time.time()
         )
         
-        # Safety configuration
+        # Safety configuration - Critical parameters to prevent injury and equipment damage
+        # These limits are enforced in software and should match or be more restrictive than hardware limits
         self.safety_limits = SafetyLimits(
-            max_joint_velocities=np.array([1.0, 1.0, 1.5, 2.0, 2.0, 3.0]),  # rad/s
+            # Joint velocity limits - Conservative values to ensure smooth, safe motion
+            max_joint_velocities=np.array([1.0, 1.0, 1.5, 2.0, 2.0, 3.0]),  # rad/s per joint
+            
+            # Joint position limits - Software enforcement of hardware mechanical limits
             joint_position_limits=(
-                np.array([-np.pi, -np.pi/2, -np.pi, -np.pi, -np.pi, -np.pi]),  # min
-                np.array([np.pi, np.pi/2, np.pi, np.pi, np.pi, np.pi])   # max
+                np.array([-np.pi, -np.pi/2, -np.pi, -np.pi, -np.pi, -np.pi]),  # min angles
+                np.array([np.pi, np.pi/2, np.pi, np.pi, np.pi, np.pi])         # max angles
             ),
+            
+            # Workspace boundaries - 3D safety envelope to protect users and environment
             workspace_boundaries={
-                'x': (0.1, 0.6),  # meters
-                'y': (-0.4, 0.4),
-                'z': (0.0, 0.5)
+                'x': (0.1, 0.6),  # Forward reach: 10cm min (avoid self-collision), 60cm max
+                'y': (-0.4, 0.4), # Side reach: ±40cm (typical arm span for desk setup)
+                'z': (0.0, 0.5)   # Vertical reach: table level to 50cm height (safe for users)
             },
-            max_end_effector_velocity=0.2,  # m/s
-            emergency_stop_enabled=False
+            
+            # End-effector speed limit - Maximum Cartesian velocity for safety
+            max_end_effector_velocity=0.2,  # 20cm/s - slow enough for safe human interaction
+            
+            # Emergency stop state - Can be activated by brain command or external signal
+            emergency_stop_enabled=False  # Default to operational state
         )
         
         # Command queue and execution
@@ -449,12 +459,15 @@ class RobotController:
             self.logger.error("Arm not connected")
             return False
         
+        # Safety Protocol Step 1: Emergency Stop Check
+        # CRITICAL: No commands executed while emergency stop is active
         if self.safety_limits.emergency_stop_enabled:
             self.logger.warning("Emergency stop active - command ignored")
             return False
         
         try:
-            # Validate command parameters
+            # Safety Protocol Step 2: Command Validation
+            # Pre-execution safety checks prevent dangerous movements
             if not self._validate_command(command, parameters):
                 return False
             
@@ -502,21 +515,23 @@ class RobotController:
             True if command is safe to execute
         """
         try:
-            # Check if arm is in error state
+            # Safety Check 1: Arm Error State
+            # CRITICAL: Prevent commands when arm is in fault condition
             if self.current_state.error_state:
                 self.logger.warning("Cannot execute command - arm in error state")
                 return False
             
-            # Validate movement commands
+            # Safety Check 2: Movement Command Validation
+            # Pre-calculate trajectory to ensure it stays within safe workspace
             if command in [ArmCommand.MOVE_UP, ArmCommand.MOVE_DOWN, 
                           ArmCommand.MOVE_LEFT, ArmCommand.MOVE_RIGHT,
                           ArmCommand.MOVE_FORWARD, ArmCommand.MOVE_BACKWARD]:
                 
-                # Check workspace boundaries
+                # Get current safe position
                 current_pos = self.current_state.end_effector_position
                 step_size = parameters.get('step_size', 0.02) if parameters else 0.02
                 
-                # Calculate new position based on command
+                # Safety Protocol: Calculate predicted end position BEFORE movement
                 new_pos = current_pos.copy()
                 if command == ArmCommand.MOVE_UP:
                     new_pos[2] += step_size
@@ -531,12 +546,14 @@ class RobotController:
                 elif command == ArmCommand.MOVE_BACKWARD:
                     new_pos[0] -= step_size
                 
-                # Check workspace boundaries
+                # Safety Check 3: Workspace Boundary Enforcement
+                # CRITICAL: Reject any movement that would violate safety boundaries
                 limits = self.safety_limits.workspace_boundaries
                 if not (limits['x'][0] <= new_pos[0] <= limits['x'][1] and
                         limits['y'][0] <= new_pos[1] <= limits['y'][1] and
                         limits['z'][0] <= new_pos[2] <= limits['z'][1]):
-                    self.logger.warning("Command would exceed workspace boundaries")
+                    self.logger.warning(f"Command would exceed workspace boundaries: {new_pos}")
+                    self.logger.warning(f"Safe limits - X: {limits['x']}, Y: {limits['y']}, Z: {limits['z']}")
                     return False
             
             return True
@@ -695,16 +712,32 @@ class RobotController:
         return self.current_state
     
     def emergency_stop(self) -> None:
-        """Activate emergency stop - immediately halt all motion."""
+        """
+        Activate emergency stop - immediately halt all motion.
+        
+        Safety Protocol: This is the highest priority safety function
+        - Immediately stops all arm movement
+        - Blocks all future commands until reset
+        - Can be triggered by brain command, ROS2 topic, or manual activation
+        """
         self.safety_limits.emergency_stop_enabled = True
         self._send_stop_command()
-        self.logger.warning("Emergency stop activated")
+        self.logger.warning("EMERGENCY STOP ACTIVATED - All motion halted")
+        self.logger.warning("System locked until emergency stop is manually reset")
     
     def reset_emergency_stop(self) -> None:
-        """Reset emergency stop condition."""
+        """
+        Reset emergency stop condition.
+        
+        Safety Protocol: Only reset after confirming:
+        1. Area is clear of personnel and obstacles
+        2. Arm is in a safe configuration
+        3. All error conditions have been resolved
+        """
         self.safety_limits.emergency_stop_enabled = False
         self.current_state.error_state = False
-        self.logger.info("Emergency stop reset")
+        self.logger.info("Emergency stop reset - System operational")
+        self.logger.info("Verify arm workspace is clear before issuing movement commands")
     
     def disconnect(self) -> None:
         """Disconnect from robotic arm hardware."""

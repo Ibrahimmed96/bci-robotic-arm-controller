@@ -265,17 +265,35 @@ class BCIDataStreamer:
             
             self.logger.info(f"Connecting to OpenBCI board on {self.port}")
             
-            # Initialize the board
+            # Initialize the board with comprehensive error handling
             self.board = OpenBCICyton(port=self.port, baud=self.baud_rate, daisy=self.daisy)
             
-            # Configure board settings
+            # Configure board settings for optimal signal quality
             self._configure_board()
             
             self.logger.info("Successfully connected to OpenBCI board")
             return True
             
         except Exception as e:
-            self.logger.error(f"Failed to connect to OpenBCI board: {e}")
+            # Hardware troubleshooting: Common connection issues and solutions
+            error_msg = str(e).lower()
+            if "permission denied" in error_msg:
+                self.logger.error(f"Permission denied on {self.port}. "
+                                f"Try: sudo chmod 666 {self.port} or add user to dialout group")
+            elif "no such file" in error_msg or "cannot find" in error_msg:
+                self.logger.error(f"Port {self.port} not found. Check USB connection and try: ls /dev/ttyUSB* /dev/ttyACM*")
+            elif "timeout" in error_msg or "timed out" in error_msg:
+                self.logger.error(f"Connection timeout. Check OpenBCI battery (>20%) and USB dongle pairing (solid blue LED)")
+            elif "busy" in error_msg or "in use" in error_msg:
+                self.logger.error(f"Port {self.port} in use. Close other applications or try different port")
+            else:
+                self.logger.error(f"Failed to connect to OpenBCI board: {e}")
+                
+            self.logger.info("Hardware troubleshooting tips:")
+            self.logger.info("1. Verify OpenBCI board is powered on (solid blue LED)")
+            self.logger.info("2. Check USB dongle connection and pairing")
+            self.logger.info("3. Try power cycling the OpenBCI board")
+            self.logger.info("4. Test with OpenBCI GUI first to verify hardware")
             return False
     
     def _configure_board(self) -> None:
@@ -284,25 +302,31 @@ class BCIDataStreamer:
             return
         
         try:
-            # Reset board to default state
-            self.board.send_command('v')  # Reset to default
-            time.sleep(0.5)
+            # Reset board to default state for consistent configuration
+            self.board.send_command('v')  # Reset to default settings
+            time.sleep(0.5)  # Allow time for reset to complete
             
-            # Configure channels for EEG recording
-            # Set all channels to normal input, gain 24, no bias
+            # Configure channels for optimal EEG recording
+            # Hardware setup: Normal input, gain 24 (good SNR for EEG), no bias removal
             for i in range(1, self.num_channels + 1):
-                cmd = f'x{i}060110X'  # Normal input, gain 24, normal power, bias off
+                cmd = f'x{i}060110X'  # Channel config: Normal input, gain 24, normal power, bias off
                 self.board.send_command(cmd)
-                time.sleep(0.1)
+                time.sleep(0.1)  # Small delay prevents command buffer overflow
             
-            # Enable bias drive and SRB2
-            self.board.send_command('C2')  # Connect SRB2 to all N inputs
-            self.board.send_command('B1')  # Enable bias drive
+            # Enable critical reference settings for high-quality EEG
+            self.board.send_command('C2')  # Connect SRB2 (Signal Reference 2) to all N inputs for common reference
+            self.board.send_command('B1')  # Enable bias drive to reduce common-mode interference
             
             self.logger.info("Board configuration completed")
             
         except Exception as e:
+            # Configuration troubleshooting: Board may still work with default settings
             self.logger.warning(f"Board configuration failed: {e}")
+            self.logger.warning("Continuing with default board settings - signal quality may be reduced")
+            self.logger.info("Configuration troubleshooting:")
+            self.logger.info("1. Ensure OpenBCI firmware is up to date")
+            self.logger.info("2. Try power cycling the board if commands fail")
+            self.logger.info("3. Check for interference from other USB devices")
     
     def _data_handler(self, sample) -> None:
         """

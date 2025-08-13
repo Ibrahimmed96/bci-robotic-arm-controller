@@ -84,13 +84,14 @@ class SignalProcessor:
         # Initialize filters
         self.filters = self._setup_filters(filter_config or {})
         
-        # Feature extraction parameters
+        # Feature extraction parameters - EEG frequency bands for brain state analysis
+        # Each band represents different neural activity patterns used in BCI classification
         self.frequency_bands = {
-            'delta': (0.5, 4),      # Deep sleep, unconscious processes
-            'theta': (4, 8),        # Drowsiness, meditation, creativity
-            'alpha': (8, 13),       # Relaxed awareness, eyes closed
-            'beta': (13, 30),       # Active thinking, concentration
-            'gamma': (30, 100),     # High-level cognitive processing
+            'delta': (0.5, 4),      # Deep sleep, unconscious processes - rarely used in BCI
+            'theta': (4, 8),        # Drowsiness, meditation, creativity - useful for relaxation states
+            'alpha': (8, 13),       # Relaxed awareness, eyes closed - key for rest/focus classification
+            'beta': (13, 30),       # Active thinking, concentration - primary for focus detection
+            'gamma': (30, 100),     # High-level cognitive processing - supplementary features
         }
         
         # Buffer for continuous processing
@@ -187,17 +188,23 @@ class SignalProcessor:
         filtered_data = data.copy()
         
         try:
-            # Apply filters in optimal order
-            # 1. High-pass to remove baseline drift
+            # Apply filters in optimal order for EEG signal conditioning
+            # Algorithm explanation: Multi-stage filtering approach for maximum artifact rejection
+            
+            # 1. High-pass to remove baseline drift and very slow artifacts (<0.5Hz)
+            # Critical for removing DC offset and sweat artifacts that can saturate amplifiers
             filtered_data = signal.sosfilt(self.filters['highpass'], filtered_data, axis=0)
             
-            # 2. Notch filter to remove power line interference
+            # 2. Notch filter to remove power line interference (50/60Hz and harmonics)
+            # Uses narrow-band IIR filter to preserve adjacent EEG frequencies
             filtered_data = signal.sosfilt(self.filters['notch'], filtered_data, axis=0)
             
-            # 3. Bandpass for general signal conditioning
+            # 3. Bandpass for general signal conditioning (1-45Hz typical for EEG)
+            # Preserves neural oscillations while removing high-frequency EMG artifacts
             filtered_data = signal.sosfilt(self.filters['bandpass'], filtered_data, axis=0)
             
-            # 4. Low-pass for anti-aliasing
+            # 4. Low-pass anti-aliasing filter to prevent spectral folding
+            # Final stage ensures clean frequency domain analysis in next steps
             filtered_data = signal.sosfilt(self.filters['lowpass'], filtered_data, axis=0)
             
         except Exception as e:
@@ -312,13 +319,17 @@ class SignalProcessor:
         
         try:
             # Compute power spectral density using Welch's method
-            # This provides better frequency resolution and noise reduction
-            window_length = min(int(self.sampling_rate * 2), samples)  # 2 second windows
-            overlap = window_length // 2
+            # Algorithm explanation: Welch's method reduces noise by averaging multiple windowed periodograms
+            # This provides more reliable frequency domain features than single FFT
+            window_length = min(int(self.sampling_rate * 2), samples)  # 2 second windows for good freq resolution
+            overlap = window_length // 2  # 50% overlap reduces variance while maintaining independence
             
+            # Welch's algorithm: Window -> FFT -> Average for robust spectral estimation
             freqs, psd = signal.welch(data, fs=self.sampling_rate, 
-                                    window='hann', nperseg=window_length,
-                                    noverlap=overlap, axis=0)
+                                    window='hann',           # Hann window reduces spectral leakage
+                                    nperseg=window_length,   # Segment length affects frequency resolution
+                                    noverlap=overlap,        # Overlap improves variance reduction
+                                    axis=0)                  # Process along time axis
             
             # Extract power in each frequency band
             for band_name, (low_freq, high_freq) in self.frequency_bands.items():
@@ -567,23 +578,27 @@ class EEGClassifier:
             Configured machine learning model
         """
         if self.model_type == 'rf':
-            # Random Forest - good for interpretability and robustness
+            # Random Forest - Ensemble method ideal for EEG classification
+            # Algorithm: Combines multiple decision trees with bootstrap aggregating (bagging)
+            # Advantages: Handles high-dimensional EEG features well, provides feature importance
             model = RandomForestClassifier(
-                n_estimators=100,
-                max_depth=10,
-                min_samples_split=5,
-                min_samples_leaf=2,
-                random_state=42,
-                n_jobs=-1  # Use all available cores
+                n_estimators=100,        # Number of trees - balance between accuracy and speed
+                max_depth=10,            # Tree depth limit prevents overfitting on noisy EEG data
+                min_samples_split=5,     # Min samples to split node - reduces overfitting
+                min_samples_leaf=2,      # Min samples per leaf - ensures statistical reliability
+                random_state=42,         # Reproducible results for model comparison
+                n_jobs=-1                # Parallel processing for faster training
             )
         elif self.model_type == 'svm':
-            # Support Vector Machine - good for high-dimensional data
+            # Support Vector Machine - Powerful for high-dimensional EEG feature spaces
+            # Algorithm: Finds optimal hyperplane separating brain states in feature space
+            # Advantages: Effective with many features, good generalization with RBF kernel
             model = SVC(
-                kernel='rbf',
-                C=1.0,
-                gamma='scale',
-                probability=True,  # Enable probability estimates
-                random_state=42
+                kernel='rbf',            # Radial basis function kernel handles non-linear patterns
+                C=1.0,                   # Regularization parameter - balance between margin and errors
+                gamma='scale',           # Kernel coefficient - auto-scaled based on features
+                probability=True,        # Enable probability estimates for confidence scoring
+                random_state=42          # Reproducible results
             )
         else:
             self.logger.warning(f"Unknown model type {self.model_type}, using Random Forest")

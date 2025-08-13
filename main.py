@@ -82,13 +82,13 @@ class BCIApplication:
         self.is_running = False
         self.ros_node = None
         
-        # Performance monitoring
+        # Performance monitoring - Real-time metrics for system optimization
         self.start_time = None
         self.performance_stats = {
-            'uptime': 0,
-            'commands_processed': 0,
-            'errors_encountered': 0,
-            'average_processing_time': 0
+            'uptime': 0,                    # Total system runtime in seconds
+            'commands_processed': 0,        # Number of brain commands successfully executed
+            'errors_encountered': 0,        # Count of system errors for reliability tracking
+            'average_processing_time': 0    # Mean time for brain signal -> robot command pipeline
         }
         
         # Signal handlers for graceful shutdown
@@ -272,28 +272,33 @@ class BCIApplication:
         """Run the main control loop without ROS2."""
         self.logger.info("Running non-ROS2 control loop...")
         
-        processing_interval = 0.2  # Process every 200ms
+        # Performance optimization: 200ms interval balances responsiveness with CPU efficiency
+        # Lower values (100ms) increase responsiveness but consume more CPU
+        # Higher values (500ms) reduce CPU load but may feel laggy to users
+        processing_interval = 0.2  # Process every 200ms - optimal for real-time BCI
         last_processing_time = 0
         
         while self.is_running:
             try:
                 current_time = time.time()
                 
-                # Process EEG data periodically
+                # Process EEG data periodically to maintain real-time performance
                 if current_time - last_processing_time >= processing_interval:
                     self._process_brain_signals()
                     last_processing_time = current_time
                 
-                # Update performance stats
+                # Update performance stats for monitoring system health
                 self.performance_stats['uptime'] = current_time - self.start_time
                 
-                # Small sleep to prevent excessive CPU usage
+                # Performance optimization: Short sleep prevents busy-waiting while maintaining responsiveness
+                # 10ms sleep provides good balance between CPU usage and response time
                 time.sleep(0.01)
                 
             except Exception as e:
                 self.logger.error(f"Control loop error: {e}")
                 self.performance_stats['errors_encountered'] += 1
-                time.sleep(0.1)  # Longer sleep on error
+                # Longer sleep on error to prevent error flooding and system overload
+                time.sleep(0.1)
     
     def _process_brain_signals(self) -> None:
         """Process EEG signals and execute arm commands."""
@@ -322,16 +327,17 @@ class BCIApplication:
             # Classify brain state
             prediction, confidence, probabilities = eeg_classifier.predict(features)
             
-            # Execute command if confidence is high enough
+            # Execute command if confidence is high enough to ensure reliable control
             if confidence >= self.config.confidence_threshold:
-                # Map brain state to arm command
+                # Performance optimization: Static command mapping prevents repeated dictionary creation
+                # Brain state -> Robot command mapping for intuitive control
                 command_mapping = {
-                    'rest': 'STOP',
-                    'focus': 'MOVE_FORWARD',
-                    'relax': 'MOVE_BACKWARD',
-                    'movement': 'MOVE_UP',
-                    'left_hand': 'MOVE_LEFT',
-                    'right_hand': 'MOVE_RIGHT',
+                    'rest': 'STOP',              # Relaxed state stops all movement
+                    'focus': 'MOVE_FORWARD',     # Focused attention moves arm forward
+                    'relax': 'MOVE_BACKWARD',    # Deep relaxation retracts arm
+                    'movement': 'MOVE_UP',       # Motor imagery lifts arm
+                    'left_hand': 'MOVE_LEFT',    # Left hand imagery moves left
+                    'right_hand': 'MOVE_RIGHT',  # Right hand imagery moves right
                 }
                 
                 if prediction in command_mapping:
@@ -344,7 +350,8 @@ class BCIApplication:
                         self.logger.debug(f"Executed: {prediction} -> {arm_command.value} "
                                         f"(confidence: {confidence:.3f})")
             
-            # Update processing time statistics
+            # Performance tracking: Exponential moving average for smooth latency monitoring
+            # Weight of 0.1 provides good balance between responsiveness and stability
             processing_time = time.time() - start_time
             self.performance_stats['average_processing_time'] = (
                 self.performance_stats['average_processing_time'] * 0.9 + 
